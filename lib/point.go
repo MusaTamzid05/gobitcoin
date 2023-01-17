@@ -2,6 +2,7 @@ package lib
 
 import (
     "fmt"
+    "errors"
 )
 
 
@@ -12,26 +13,45 @@ type Point struct {
     y *FieldElement
 }
 
-func NewPoint(x, y, a, b *FieldElement)  *Point {
+func NewPoint(x, y, a, b *FieldElement)  (*Point, error){
     var err error
     _y, err := y.Pow(2)
 
-    ErrorCheck(err)
+    if err != nil {
+        return nil, err
+    }
 
     _x, err:= x.Pow(3)
-    ErrorCheck(err)
+
+    if err != nil {
+        return nil, err
+    }
 
     ax, err  := a.Mul(x)
-    ErrorCheck(err)
+
+    if err != nil {
+        return nil, err
+    }
 
     x_ax, err  := _x.Add(ax)
-    ErrorCheck(err)
+
+    if err != nil {
+        return nil, err
+    }
+
 
     x_ax_b, err:= x_ax.Add(b)
-    ErrorCheck(err)
+
+    if err != nil {
+        return nil, err
+    }
 
     if !_y.Equal(x_ax_b)  {
-        panic("Is not on the curve")
+        return nil, errors.New("Is not on the curve")
+    }
+
+    if err != nil {
+        return nil, err
     }
 
     return &Point {
@@ -39,7 +59,7 @@ func NewPoint(x, y, a, b *FieldElement)  *Point {
         b: b,
         x: x,
         y: y,
-    } 
+    } , nil
 }
 
 func (p Point) Print() {
@@ -56,21 +76,21 @@ func PointEqual(p1, p2 *Point) bool {
     return e1 == true &&  e2 == true && e3 == true && e4 == true
 }
 
-func PointAdd(p1, p2 *Point) *Point {
+func PointAdd(p1, p2 *Point) (*Point, error){
 
     e1 := p1.a.Equal(p2.a)
     e2 := p1.b.Equal(p2.b)
 
     if !e1 || !e2 {
-        panic("Is not on the curve")
+        return nil, errors.New("Is not on the curve")
     }
 
     if p1.x == nil {
-        return p2
+        return p2, nil
     }
 
     if p2.x == nil {
-        return p1
+        return p1, nil
     }
 
     zero,_ := NewFieldElement(0, p1.x.prime) // dont know whether this is right
@@ -81,8 +101,7 @@ func PointAdd(p1, p2 *Point) *Point {
         return NewPoint(p1.a, p1.b, nil, nil)
     }
 
-    panic("Add error")
-
+    return nil, errors.New("points are not equal")
 }
 
 
