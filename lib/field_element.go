@@ -54,6 +54,19 @@ func (f FieldElement) Mul(other *FieldElement) ( *FieldElement, error) {
 }
 
 
+func (f FieldElement) Div(other *FieldElement) ( *FieldElement, error) {
+    if f.prime != other.prime {
+        return nil, errors.New("Cannot add two numbere in different field")
+    }
+
+    return &FieldElement{
+        num: (f.num * other.num) % f.prime,
+        prime: f.prime,
+    }, nil
+}
+
+
+
 func (f FieldElement) Pow(exponent int) ( *FieldElement, error) {
     n := exponent 
 

@@ -94,14 +94,36 @@ func PointAdd(p1, p2 *Point) (*Point, error){
     }
 
     zero,_ := NewFieldElement(0, p1.x.prime) // dont know whether this is right
-    mul, _ :=  zero.Mul(p1.x)
+    mul, err  :=  zero.Mul(p1.x)
+
+    if err != nil {
+        return nil, err
+    }
+
 
 
     if PointEqual(p1, p2) && p1.y.Equal(mul) {
-        return NewPoint(p1.a, p1.b, nil, nil)
+        return NewPoint(nil, nil,p1.a, p1.b)
     }
 
-    return nil, errors.New("points are not equal")
+    if !p1.x.Equal(p2.x) {
+        diffY , _ := p2.y.Sub(p1.y)
+        diffX , _ := p2.x.Sub(p1.x)
+        s, _ := diffY.Div(diffX)
+
+        xpart1, _ := s.Pow(2)
+        xpart2, _ := xpart1.Sub(xpart1)
+        x, _ := xpart2.Sub(p2.y)
+        ypart2, _ := p1.x.Sub(x)
+        ypart1, _ := s.Mul(ypart2)
+        y, _ := ypart1.Sub(p1.y)
+
+        return NewPoint(x, y,p1.a, p1.b)
+
+    }
+
+
+    return nil, nil
 }
 
 
