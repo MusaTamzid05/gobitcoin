@@ -12,4 +12,11 @@ func main() {
     d, _ := a.Pow(-3)
     fmt.Println(d.Equal(b))
 
+    _, err := lib.NewPoint(-1, -2, 5, 7)
+
+    if err != nil {
+        fmt.Println(err)
+    }
+
+
 }
