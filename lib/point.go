@@ -1,67 +1,88 @@
 package lib
 
 import (
-    "math"
-    "errors"
+    "fmt"
 )
 
-type PointInt struct {
-    i int
-}
 
 type Point struct {
-    a int
-    b int
-    x *PointInt
-    y *PointInt
+    a *FieldElement
+    b *FieldElement
+    x *FieldElement
+    y *FieldElement
 }
 
-func NewPoint(x, y, a, b int)  (*Point, error) {
-    if math.Pow(float64(y), 2.0) != math.Pow(float64(x), 3) + (float64(a) * float64(x)) + float64(b) {
-        return &Point{}, errors.New("Is not on the curve")
+func NewPoint(x, y, a, b *FieldElement)  *Point {
+    var err error
+    _y, err := y.Pow(2)
+
+    ErrorCheck(err)
+
+    _x, err:= x.Pow(3)
+    ErrorCheck(err)
+
+    ax, err  := a.Mul(x)
+    ErrorCheck(err)
+
+    x_ax, err  := _x.Add(ax)
+    ErrorCheck(err)
+
+    x_ax_b, err:= x_ax.Add(b)
+    ErrorCheck(err)
+
+    if !_y.Equal(x_ax_b)  {
+        panic("Is not on the curve")
     }
+
     return &Point {
         a: a,
         b: b,
-        x: &PointInt{i: x},
-        y: &PointInt{i: y},
-    }, nil
+        x: x,
+        y: y,
+    } 
 }
 
-func NewInfinityPoint(a, b int)  *Point {
-    return &Point {
-        a: a,
-        b: b,
-        x: nil,
-        y: nil,
-    }
+func (p Point) Print() {
+    fmt.Println("x = ", p.x, " y = ", p.y, " a = ", p.a, " b = ", p.b)
 }
+
 
 func PointEqual(p1, p2 *Point) bool {
-    return p1.x == p2.x &&
-           p1.y == p2.y &&
-           p1.a == p2.a &&
-           p1.b == p2.b 
+    e1 := p1.x.Equal(p2.x)
+    e2 := p1.y.Equal(p2.y)
+    e3 := p1.a.Equal(p2.a)
+    e4 := p1.b.Equal(p2.b)
 
+    return e1 == true &&  e2 == true && e3 == true && e4 == true
 }
-func PointAdd(p1, p2 *Point) (*Point, error) {
-    if (p1.a != p2.a ) || (p1.b != p2.b) {
-        return &Point{}, errors.New("Is not on the curve")
+
+func PointAdd(p1, p2 *Point) *Point {
+
+    e1 := p1.a.Equal(p2.a)
+    e2 := p1.b.Equal(p2.b)
+
+    if !e1 || !e2 {
+        panic("Is not on the curve")
     }
 
     if p1.x == nil {
-        return p2, nil
+        return p2
     }
 
     if p2.x == nil {
-        return p1, nil
+        return p1
     }
 
-    if PointEqual(p1, p2) && p1.y.i == 0 * p1.x.i {
-        return NewInfinityPoint(p1.a, p1.b), nil
+    zero,_ := NewFieldElement(0, p1.x.prime) // dont know whether this is right
+    mul, _ :=  zero.Mul(p1.x)
 
+
+    if PointEqual(p1, p2) && p1.y.Equal(mul) {
+        return NewPoint(p1.a, p1.b, nil, nil)
     }
 
-    return &Point{}, errors.New("Add error")
+    panic("Add error")
+
 }
+
 

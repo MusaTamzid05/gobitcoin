@@ -1,22 +1,18 @@
 package main
 
 import (
-    "fmt"
     "musa.io/bitcoin/lib"
 )
 
 func main() {
-    a, _ :=  lib.NewFieldElement(3, 13)
-    b, _ :=  lib.NewFieldElement(1, 13)
+    a, _ :=  lib.NewFieldElement(0, 223)
+    b, _ :=  lib.NewFieldElement(7, 223)
+    x, _ :=  lib.NewFieldElement(192, 223)
+    y, _ :=  lib.NewFieldElement(105, 223)
 
-    d, _ := a.Pow(-3)
-    fmt.Println(d.Equal(b))
 
-    _, err := lib.NewPoint(-1, -2, 5, 7)
-
-    if err != nil {
-        fmt.Println(err)
-    }
+    result := lib.NewPoint(x, y, a, b)
+    result.Print()
 
 
 }
